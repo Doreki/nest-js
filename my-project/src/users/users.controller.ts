@@ -4,9 +4,12 @@ import { CreateUserDto } from './dto/create-user.dto';
 @Controller('users')
 export class UsersController {
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    const { name, email } = createUserDto;
+  async createUser(@Body() dto: CreateUserDto): Promise<void> {
+    console.log(dto);
+  }
 
-    return `유저를 생성했습니다. 이름: ${name} , 이메일: ${email}`;
+  @Post('/email-verify')
+  async verifyEmail(@Query() dto:VerifyEmailDto):Promise<string>{
+    console.log(this.$destroy()return;
   }
 }
