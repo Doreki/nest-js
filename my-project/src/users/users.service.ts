@@ -1,31 +1,53 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'os';
 import { EmailService } from 'src/email/email.service';
+import { Repository } from 'typeorm';
+import { ulid } from 'ulid';
+import { UserEntity } from './user.entity';
 
 @Injectable()
 export class UsersService {
-  constructor(private emailService: EmailService) {}
+  constructor(
+    private emailService: EmailService,
+    @InjectRepository(UserEntity)
+    private usersRepository: Repository<UserEntity>,
+  ) {}
 
+  private async saveUser(
+    name: string,
+    email: string,
+    password: string,
+    signupVerifyToken: string,
+  ) {
+    const user = new UserEntity();
+    user.id = ulid();
+    user.name = name;
+    user.email = email;
+    user.password = password;
+    user.signupVerifyToken = signupVerifyToken;
+    await this.usersRepository.save(user);
+  }
   async createUser(name: string, email: string, password: string) {
-    await this.checkUserExists(email);
+    const userExist = await this.checkUserExists(email);
 
+    if (userExist) {
+      throw new UnprocessableEntityException(
+        '해당 이메일로는 가입할 수 없습니다.',
+      );
+    }
     const signupVerifyToken = uuid.v1();
 
     await this.saveUser(name, email, password, signupVerifyToken);
     await this.sendMemberJoinEmail(email, signupVerifyToken);
   }
 
-  private checkUserExists(email: string) {
-    return false;
-  }
+  private async checkUserExists(emailAddress: string): Promise<boolean> {
+    const user = await this.usersRepository.findOne({
+      where: { email: emailAddress },
+    });
 
-  private saveUser(
-    name: string,
-    email: string,
-    password: string,
-    signupVerifyToken: string,
-  ) {
-    retrun;
+    return user !== undefined;
   }
 
   private async sendMemberJoinEmail(email: string, signupVerifyToken: string) {
