@@ -1,9 +1,11 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import emailConfig from './config/emailConfig';
 import { UsersModule } from './users/users.module';
 import { validationSchema } from './config/validation-schema';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { LoggerMiddleware } from './logger.middleware';
+import { UsersController } from './users/users.controller';
 
 @Module({
   imports: [
@@ -28,4 +30,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): any {
+    consumer.apply(LoggerMiddleware).forRoutes(UsersController);
+  }
+}
