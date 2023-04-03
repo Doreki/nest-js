@@ -2,7 +2,7 @@ import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfo } from 'os';
 import { EmailService } from 'src/email/email.service';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { ulid } from 'ulid';
 import { UserEntity } from './user.entity';
 
@@ -12,8 +12,46 @@ export class UsersService {
     private emailService: EmailService,
     @InjectRepository(UserEntity)
     private usersRepository: Repository<UserEntity>,
+    private dataSource: DataSource,
   ) {}
 
+  private async saveUserUsingQueryRunner(
+    name: string,
+    email: string,
+    password: string,
+    signupVerifyToken: string,
+  ) {
+    // const queryRunner = this.dataSource.createQueryRunner();
+
+    // await queryRunner.connect();
+    // await queryRunner.startTransaction();
+
+    // try {
+    //   const user = new UserEntity();
+    //   user.id = ulid();
+    //   user.name = name;
+    //   user.email = email;
+    //   user.password = password;
+    //   user.signupVerifyToken = signupVerifyToken;
+
+    //   await queryRunner.manager.save(user);
+    // } catch (e) {
+    //   await queryRunner.rollbackTransaction();
+    // } finally {
+    //   await queryRunner.release();
+    // }
+
+    await this.dataSource.transaction(async (manager) => {
+      const user = new UserEntity();
+      user.id = ulid();
+      user.name = name;
+      user.email = email;
+      user.password = password;
+      user.signupVerifyToken = signupVerifyToken;
+
+      await manager.save(user);
+    });
+  }
   private async saveUser(
     name: string,
     email: string,
@@ -36,6 +74,7 @@ export class UsersService {
         '해당 이메일로는 가입할 수 없습니다.',
       );
     }
+
     const signupVerifyToken = uuid.v1();
 
     await this.saveUser(name, email, password, signupVerifyToken);
