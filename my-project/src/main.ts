@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import { ValidationPipe } from '@nestjs/common';
+import { MyLogger } from './mylogger';
 
 dotenv.config({
   path: path.resolve(
@@ -15,12 +16,18 @@ dotenv.config({
 });
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger:
+      process.env.NODE_ENV === 'production'
+        ? ['error', 'warn', 'log']
+        : ['error', 'warn', 'log', 'verbose', 'debug'],
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
     }),
   );
+  app.useLogger(app.get(MyLogger));
   await app.listen(3000);
 }
 bootstrap();

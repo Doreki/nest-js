@@ -6,6 +6,11 @@ import { validationSchema } from './config/validation-schema';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerMiddleware } from './logger.middleware';
 import { UsersController } from './users/users.controller';
+import {
+  WinstonModule,
+  utilities as nestWinstonModuleUtilities,
+} from 'nest-winston';
+import * as winston from 'winston/lib/winston/config';
 
 @Module({
   imports: [
@@ -26,6 +31,9 @@ import { UsersController } from './users/users.controller';
       synchronize: process.env.DATA_BASE_HOST === 'true',
     }),
     UsersModule,
+    WinstonModule.forRoot({
+      transports: [new winston.transports.Console()],
+    }),
   ],
   controllers: [],
   providers: [],
