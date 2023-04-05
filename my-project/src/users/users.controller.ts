@@ -49,6 +49,7 @@ export class UsersController {
     const jwtString = headers.authorization.split('Bearer ')[1];
 
     this.authService.verify(jwtString);
+
     return await this.usersService.getUserInfo(userId);
   }
 }
