@@ -11,6 +11,8 @@ import {
   utilities as nestWinstonModuleUtilities,
 } from 'nest-winston';
 import * as winston from 'winston/lib/winston/config';
+import { TerminusModule } from '@nestjs/terminus';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -20,6 +22,7 @@ import * as winston from 'winston/lib/winston/config';
       isGlobal: true,
       validationSchema,
     }),
+    TerminusModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DATA_BASE_HOST,
@@ -34,6 +37,7 @@ import * as winston from 'winston/lib/winston/config';
     WinstonModule.forRoot({
       transports: [new winston.transports.Console()],
     }),
+    HttpModule,
   ],
   controllers: [],
   providers: [],
