@@ -7,8 +7,10 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { CommandBus } from '@nestjs/cqrs';
 import { UserInfo } from 'os';
 import { AuthService } from 'src/auth/auth.service';
+import { CreateUserCommand } from 'src/cqrs/create.user.command';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
@@ -19,12 +21,16 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private authService: AuthService,
+    private commandBus: CommandBus,
   ) {}
 
   @Post()
   async createUser(@Body() dto: CreateUserDto): Promise<void> {
     const { name, email, password } = dto;
-    await this.usersService.createUser(name, email, password);
+
+    const command = new CreateUserCommand(name, email, password);
+
+    return this.commandBus.execute(command);
   }
 
   @Post('/email-verify')

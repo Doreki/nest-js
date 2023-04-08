@@ -13,6 +13,7 @@ import {
 import * as winston from 'winston/lib/winston/config';
 import { TerminusModule } from '@nestjs/terminus';
 import { HttpModule } from '@nestjs/axios';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { HttpModule } from '@nestjs/axios';
       transports: [new winston.transports.Console()],
     }),
     HttpModule,
+    CqrsModule,
   ],
   controllers: [],
   providers: [],
